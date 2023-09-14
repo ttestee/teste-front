@@ -1,6 +1,6 @@
 <h1  >API REST - TESTE KUKAC - VAGA DE DESENVOLVEDOR FULL STACK</h1>
  <hr>
-<p align="left">O projeto tem como base  um SPA que consome uma api para resolução dos desafios. A api se encontra no seguinte repositório:https://github.com/4l1son/teste-kukac-apibackend </p>
+<p align="left">O projeto tem como base  um SPA que consome uma api para resolução dos desafios. A api se encontra no seguinte repositório:https://github.com/teste-kukac/teste-kukac-backend/p>
 
 <h2>Tecnologias utilizadas</h2>
 <div style="display: inline_block">
