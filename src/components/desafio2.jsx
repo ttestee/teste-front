@@ -1,85 +1,63 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { calcularTroco } from '../http/axios'; 
+import React, { useState, useEffect } from 'react'; // Importe o useEffect
+import { Link } from 'react-router-dom'; 
 import stylesDesafios from '../styles/stylesDesafios.css';
 
 const Desafio2 = () => {
-  const [valorCompra, setValorCompra] = useState('');
-  const [pagamento, setPagamento] = useState('');
-  const [trocoData, setTrocoData] = useState(null);
-  const [error, setError] = useState(null);
+  const [bugs, setBugs] = useState([]);
 
-  const handleValorCompraChange = (event) => {
-    setValorCompra(event.target.value);
-  };
+  useEffect(() => {
 
-  const handlePagamentoChange = (event) => {
-    setPagamento(event.target.value);
-  };
-
-  const handleCalcularTroco = async () => {
-    try {
-      const trocoData = await calcularTroco(parseFloat(valorCompra), parseFloat(pagamento));
-      setTrocoData(trocoData);
-      setError(null);
-    } catch (error) {
-      setError('Erro ao calcular o troco. Verifique os valores inseridos.');
-      setTrocoData(null);
-    }
-  };
+    fetch('https://localhost/api-backend/bugs/api_bugs.php') 
+      .then((response) => response.json())
+      .then((data) => setBugs(data))
+      .catch((error) => console.error('Erro ao buscar os bugs:', error));
+  }, []);
 
   return (
-    <div className="App home-container">
-      <h1>Desafio2 - Cálculo de Troco</h1>
-      <form>
-        <div>
-          <label htmlFor="valorCompra" className="form-label">Valor da compra: </label>
-          <input
-            type="number"
-            id="valorCompra"
-            value={valorCompra}
-            onChange={handleValorCompraChange}
-            className="form-input"
-          />
-        </div>
-        <div>
-          <label htmlFor="pagamento" className="form-label">Valor entregue pelo cliente: </label>
-          <input
-            type="number"
-            id="pagamento"
-            value={pagamento}
-            onChange={handlePagamentoChange}
-            className="form-input"
-          />
-        </div>
+    <div className='home-container' >
+          <div className="center-content"> 
+      <h1 className="form-title">Relatar um Bug</h1>
+      <form action="processa_bug.php" method="post">
+        <label htmlFor="titulo" className="form-label">Título:</label>
+        <input
+          type="text"
+          name="titulo"
+          required
+          className="form-input"/>
+          <br />
+        <label htmlFor="descricao" className="form-label">Descrição:</label>
+        <textarea
+          name="descricao"
+          required
+          className="form-input" // Aplicando a classe 'form-input'
+        ></textarea><br />
+        <input
+          type="submit"
+          value="Relatar Bug"
+          className="form-button" // Aplicando a classe 'form-button'
+        />
       </form>
-      <div className="submit-button-container">
-        <button type="button" onClick={handleCalcularTroco} className="submit-button">
-          Calcular Troco
-        </button>
-      </div>
-      {error && <div className="error">{error}</div>}
-      {trocoData && (
-        
-        <div className="App home-container">
-                
-        <h2>Resultado do Troco:</h2>
-          <p>Valor da compra: R$ {trocoData.valorCompra}</p>
-          <p>Valor do pagamento: R$ {trocoData.pagamento}</p>
-          <p>Troco a ser dado: R$ {trocoData.troco}</p>
-          <p>Número total de notas/itens necessários: {trocoData.numeroTotalNotas}</p>
-          <p>Quantidade de cada tipo de nota no troco:</p>
-          <ul>
-            {Object.entries(trocoData.quantidadeNotas).map(([nota, quantidade]) => (
-              <li key={nota}>
-                Notas de R$ {nota}: {quantidade}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+
+      <h2>Lista de Bugs</h2>
+      <ul>
+        {bugs.length > 0 ? (
+          bugs.map((bug) => (
+            <li key={bug.id}>
+              <strong>Título:</strong> {bug.titulo}<br />
+              <strong>Descrição:</strong> {bug.descricao}<br />
+              <strong>Status:</strong> {bug.status}<br />
+              <strong>Data de Criação:</strong> {bug.data_criacao}<br />
+            </li>
+          ))
+        ) : (
+          <p>Nenhum bug relatado.</p>
+        )}
+      </ul>
+
       <Link to="/" className="return-link">Retornar à página inicial</Link>
     </div>
+    </div>
+
   );
 };
 

@@ -1,69 +1,57 @@
-import React, { useState } from 'react';
+import React, { Component } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
-import stylesDesafios from '../styles/stylesDesafios.css';
 
-import { buscarNumerosPalindromos } from '../http/axios'; 
+class ServerStatus extends Component {
+    constructor() {
+        super();
+        this.state = {
+            serverStatus: null,
+            servidorInput: '', 
+        };
+    }
 
-const Sobre = () => {
-    const [numero, setNumero] = useState('');
-    const [palindromes, setPalindromes] = useState([]);
-    const [error, setError] = useState(null);
+    handleServidorInputChange = (event) => {
+        this.setState({ servidorInput: event.target.value });
+    }
 
-    const handleNumeroChange = (event) => {
-        setNumero(event.target.value);
-        // Limpar o erro ao começar a digitar novamente
-        setError(null);
-    };
+    checkServerStatus = () => {
+        const { servidorInput } = this.state;
 
-    const buscarPalindromes = async () => {
-        if (!numero) {
-            setError('Por favor, insira um número.');
-            return;
-        }
+        axios.get(`http://localhost/api-backend/sites_avaliable/index.php?servidor=${servidorInput}`)
+            .then((response) => {
+                if (response.data === 'online') {
+                    this.setState({ serverStatus: 'online' });
+                } else {
+                    this.setState({ serverStatus: 'offline' });
+                }
+            })
+            .catch((error) => {
+                this.setState({ serverStatus: 'offline' });
+                console.error('Erro ao verificar o status do servidor:', error);
+            });
+    }
 
-        try {
-            const palindromes = await buscarNumerosPalindromos(numero);
-            setPalindromes(palindromes);
-            setError(null); // Limpar qualquer erro anterior
-        } catch (error) {
-            // Trate o erro aqui, se necessário
-            setError('Erro ao buscar números palíndromos. Tente novamente mais tarde.');
-        }
-    };
+    render() {
+        return (
+            <div className="home-container"> 
+                <h1 className="form-title">Status do Servidor</h1> 
+                <input
+                    type="text"
+                    className="form-input" 
+                    placeholder="Endereço do servidor"
+                    value={this.state.servidorInput}
+                    onChange={this.handleServidorInputChange}
+                />
+                <button className="form-button" onClick={this.checkServerStatus}>Verificar</button>
+                                {this.state.serverStatus !== null && (
+                    <p>O servidor está {this.state.serverStatus}.</p>
+                )}
+          <Link to="/" className="return-link">Retornar à página inicial</Link>
 
-    return (
-        <div className="App home-container">
-
-        <h1>Desafio1 - Números palíndromos</h1>
-            <p>Insira um número para saber quantos palíndromos existem nesse intervalo</p>
-            <input
-                type='number'
-                placeholder='Insira um número'
-                className="input-number"
-                value={numero}
-                onChange={handleNumeroChange}
-            />
-
-        <div className="submit-button-container">
-       
-            <button onClick={buscarPalindromes} className="submit-button">Enviar</button>
-       </div>     
-            {error && <div className="error-message">{error}</div>}
-
-            {palindromes.length > 0 && (
-                    <div className="App home-container">
-                    <h2>Números Palíndromos:</h2>
-                    <ul>
-                        {palindromes.map((palindrome, index) => (
-                            <p key={index}>{palindrome}</p>
-                        ))}
-                    </ul>
-                </div>
-            )}
-            
-            <Link to="/" className="return-link">Retornar à página inicial</Link>
-        </div>
-    );
+            </div>
+        );
+    }
 }
 
-export default Sobre;
+export default ServerStatus;

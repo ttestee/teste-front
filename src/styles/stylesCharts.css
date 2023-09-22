@@ -1,0 +1,8 @@
+/* Adicione essas regras CSS ao seu arquivo de estilos */
+
+.chart-canvas {
+    max-width: 300px; /* Define a largura máxima desejada para o gráfico */
+    margin: 0 auto; /* Centralize o gráfico horizontalmente */
+    display: block; /* Evita que o canvas gere espaço extra */
+  }
+  

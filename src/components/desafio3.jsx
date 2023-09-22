@@ -1,112 +1,159 @@
-import React, { useState } from 'react';
-import { dadosVeiculo } from '../http/axios'; 
-import stylesDesafios from '../styles/stylesDesafios.css';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import Chart from 'chart.js/auto';
+import { Link } from 'react-router-dom'; 
 
-import { Link } from 'react-router-dom';
 
 const Desafio3 = () => {
-  const [modelo, setModelo] = useState('');
-  const [ano, setAno] = useState('');
-  const [qtdPortas, setQtdPortas] = useState('');
-  const [marca, setMarca] = useState('');
-  const [error, setError] = useState(null);
+  const [siteStatus, setSiteStatus] = useState({});
+  const [responseTimes, setResponseTimes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [urlInput, setUrlInput] = useState('');
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null); 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!modelo || !ano || !qtdPortas || !marca) {
-      setError('Por favor, preencha todos os campos.');
-      return;
-    }
-
-    const novoVeiculo = {
-      Modelo: modelo,
-      anoFabricacao: parseInt(ano),
-      qtdPortas: parseInt(qtdPortas),
-      Marcas: marca,
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (urlInput.trim() !== '') {
+          const response = await axios.get(`https://localhost/api-backend/dashboard/?url=${urlInput}`);
+          const newResponseTime = response.data.response_time;
+          setSiteStatus(response.data);
+          setResponseTimes((prevResponseTimes) => [
+            ...prevResponseTimes,
+            newResponseTime,
+          ]);
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      }
     };
 
-    try { 
-       const response = await dadosVeiculo(novoVeiculo);
+    const drawChart = () => {
+      if (canvasRef.current) {
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (response) {
-        setModelo('');
-        setAno('');
-        setQtdPortas('');
-        setMarca('');
-        setError(null);
+        const maxValue = Math.max(...responseTimes);
+        const minValue = Math.min(...responseTimes);
+        const valueRange = maxValue - minValue;
+
+        const chartHeight = 200;
+        const chartWidth = 400;
+        const xOffset = 50;
+        const yOffset = 20;
+
+        context.beginPath();
+        context.moveTo(xOffset, yOffset + chartHeight);
+
+        responseTimes.forEach((time, index) => {
+          const x = (index / (responseTimes.length - 1)) * chartWidth + xOffset;
+          const y =
+            yOffset +
+            chartHeight -
+            ((time - minValue) / valueRange) * chartHeight;
+          context.lineTo(x, y);
+        });
+
+        context.strokeStyle = 'rgba(75,192,192,1)';
+        context.lineWidth = 2;
+        context.stroke();
+
+        if (chartRef.current) {
+          chartRef.current.destroy();
+        }
+
+        chartRef.current = new Chart(context, {
+          type: 'line',
+          data: {
+            labels: responseTimes.map((_, index) => index.toString()),
+            datasets: [
+              {
+                label: 'Tempo de Resposta',
+                data: responseTimes,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'category',
+                title: {
+                  display: true,
+                  text: 'Leituras',
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Tempo de Resposta (ms)',
+                },
+              },
+            },
+          },
+        });
+      }
+    };
+
+    const interval = setInterval(() => {
+      fetchData();
+      drawChart();
+    }, 5000);
+
+    fetchData();
+    drawChart();
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [urlInput, responseTimes]);
+
+  const monitorSite = async () => {
+    try {
+      if (urlInput.trim() !== '') {
+        const response = await axios.post('https://localhost/api-backend/dashboard/', { url: urlInput });
+        console.log('Site monitorado:', response.data);
       } else {
-        setError('Erro ao adicionar veículo.');
+        console.error('URL inválida');
       }
     } catch (error) {
-      console.error(error);
-      setError('Erro ao adicionar veículo.');
+      console.error('Erro ao monitorar o site:', error);
     }
   };
 
   return (
-    <div className="App home-container">
-      <h1>Adicionar Veículo</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="modelo">Modelo:</label>
+    <div className="home-container"> 
+    <div className="center-content"> 
+      <h1>Status do Site Monitorado</h1>
+      <div>
+        <label htmlFor="urlInput">URL do Site:</label>
         <input
           type="text"
-          id="modelo"
-          name="modelo"
-          className="input-number"
-          value={modelo}
-          onChange={(e) => setModelo(e.target.value)}
+          id="urlInput"
+          className='form-input'
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
         />
-        <br />
-        <br />
-
-        <label htmlFor="ano">Ano de Fabricação:</label>
-        <input
-          type="number"
-          id="ano"
-          name="ano"
-          className="input-number"
-          value={ano}
-          onChange={(e) => setAno(e.target.value)}
-        />
-        <br />
-        <br />
-
-        <label htmlFor="qtdPortas">Quantidade de Portas:</label>
-        <input
-          type="number"
-          id="qtdPortas"
-          name="qtdPortas"
-          className="input-number"
-          value={qtdPortas}
-          onChange={(e) => setQtdPortas(e.target.value)}
-        />
-        <br />
-        <br />
-
-        <label htmlFor="marca">Marca:</label>
-        <input
-          type="text"
-          id="marca"
-          name="marca"
-          className="input-number"
-          value={marca}
-          onChange={(e) => setMarca(e.target.value)}
-        />
-        <br />
-        <br />
-
-        <div className="submit-button-container">
-       
-        <button type="submit" className="submit-button">Salvar</button>
+        <button onClick={() => monitorSite()} className='form-button'>Monitorar</button>
+      </div>
+      {isLoading ? (
+        <p>Carregando...</p>
+      ) : (
+        <div>
+          <p>Status: {siteStatus.status}</p>
+          <p>Tempo de Resposta: {siteStatus.response_time} ms</p>
+          <canvas ref={canvasRef} width={450} height={250} />
         </div>
-      </form>
-      {error && <div className="error-message">{error}</div>}
+      )}
       <Link to="/" className="return-link">Retornar à página inicial</Link>
 
-    </div>
-    
+    </div></div>
   );
-}
+};
 
 export default Desafio3;
