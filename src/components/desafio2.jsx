@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Importe o useEffect
+import React, { useState, useEffect } from 'react'; 
 import { Link } from 'react-router-dom'; 
 import stylesDesafios from '../styles/stylesDesafios.css';
 
@@ -17,7 +17,7 @@ const Desafio2 = () => {
     <div className='home-container' >
           <div className="center-content"> 
       <h1 className="form-title">Relatar um Bug</h1>
-      <form action="processa_bug.php" method="post">
+      <form  method="post">
         <label htmlFor="titulo" className="form-label">Título:</label>
         <input
           type="text"
@@ -29,12 +29,12 @@ const Desafio2 = () => {
         <textarea
           name="descricao"
           required
-          className="form-input" // Aplicando a classe 'form-input'
+          className="form-input" 
         ></textarea><br />
         <input
           type="submit"
           value="Relatar Bug"
-          className="form-button" // Aplicando a classe 'form-button'
+          className="form-button" 
         />
       </form>
 
