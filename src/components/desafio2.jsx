@@ -13,7 +13,7 @@ const Desafio2 = () => {
   }, []);
 
   const fetchBugs = () => {
-    fetch('http://localhost/api-backend/bugs/api_bugs.php') // Altere a URL conforme necessário
+    fetch('http://localhost/api-backend/bugs/api_bugs.php') 
       .then((response) => response.json())
       .then((data) => setBugs(data))
       .catch((error) => console.error('Erro ao buscar os bugs:', error));
@@ -25,16 +25,16 @@ const Desafio2 = () => {
     formData.append('titulo', titulo);
     formData.append('descricao', descricao);
 
-    fetch('http://localhost/api-backend/bugs/api_bugs.php', { // Altere a URL conforme necessário
+    fetch('http://localhost/api-backend/bugs/api_bugs.php', { 
       method: 'POST',
       body: formData,
     })
       .then((response) => response.text())
       .then((data) => {
-        setSuccessAlert(true); // Ativa o alerta de sucesso
+        setSuccessAlert(true); 
         setTitulo('');
         setDescricao('');
-        fetchBugs(); // Atualiza a lista de bugs após o envio bem-sucedido do formulário
+        fetchBugs(); 
       })
       .catch((error) => console.error('Erro ao enviar o formulário:', error));
   };
