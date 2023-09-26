@@ -16,7 +16,7 @@ const Desafio3 = () => {
     const fetchData = async () => {
       try {
         if (urlInput.trim() !== '') {
-          const response = await axios.get(`https://localhost/api-backend/dashboard/?url=${urlInput}`);
+          const response = await axios.get(`http://localhost/api-backend/dashboard/?url=${urlInput}`);
           const newResponseTime = response.data.response_time;
           setSiteStatus(response.data);
           setResponseTimes((prevResponseTimes) => [
@@ -116,7 +116,7 @@ const Desafio3 = () => {
   const monitorSite = async () => {
     try {
       if (urlInput.trim() !== '') {
-        const response = await axios.post('https://localhost/api-backend/dashboard/', { url: urlInput });
+        const response = await axios.post('http://localhost/api-backend/dashboard/', { url: urlInput });
         console.log('Site monitorado:', response.data);
       } else {
         console.error('URL inválida');
